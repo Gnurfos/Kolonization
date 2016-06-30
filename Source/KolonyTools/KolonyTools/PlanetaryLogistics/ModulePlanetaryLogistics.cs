@@ -21,7 +21,7 @@ namespace PlanetaryLogistics
         public double FillGoal = .5d;
 
         [KSPField] 
-        public double vesselIdTax = 0.05d;
+        public double ResourceTax = 0.05d;
 
         private double lastCheck;
         private USI_ModuleResourceWarehouse _wh;
@@ -39,13 +39,12 @@ namespace PlanetaryLogistics
                 if (_wh == null)
                     _wh = part.FindModuleImplementing<USI_ModuleResourceWarehouse>();
 
-
                 if (!_wh.transferEnabled)
                     return;
 
                 foreach (var res in part.Resources.list)
                 {
-                    LevelvesselIds(res.resourceName);
+                    LevelResources(res.resourceName);
                 }
             }
             catch (Exception ex)
@@ -55,10 +54,28 @@ namespace PlanetaryLogistics
         }
 
 
-        private void LevelvesselIds(string vesselId)
+        private void LevelResources(string resource)
         {
-            var res = part.Resources[vesselId];
+            var res = part.Resources[resource];
             var body = vessel.mainBody.flightGlobalsIndex;
+
+            if (!res.flowState)
+            {
+                if (res.amount <= 0)
+                    return;
+                
+                if (!PlanetaryLogisticsManager.Instance.DoesLogEntryExist(resource, body))
+                    return;
+                
+                var logEntry = PlanetaryLogisticsManager.Instance.FetchLogEntry(resource, body);
+                logEntry.StoredQuantity += (res.amount * (1d - ResourceTax));
+                res.amount = 0;
+
+                PlanetaryLogisticsManager.Instance.TrackLogEntry(logEntry);
+                
+                return;
+            }
+
             var fillPercent = res.amount / res.maxAmount;
             if (fillPercent < LowerTrigger)
             {
@@ -66,10 +83,10 @@ namespace PlanetaryLogistics
                 if (!(amtNeeded > 0)) 
                     return;
 
-                if (!PlanetaryLogisticsManager.Instance.DoesLogEntryExist(vesselId, body)) 
+                if (!PlanetaryLogisticsManager.Instance.DoesLogEntryExist(resource, body)) 
                     return;
                 
-                var logEntry = PlanetaryLogisticsManager.Instance.FetchLogEntry(vesselId, body);
+                var logEntry = PlanetaryLogisticsManager.Instance.FetchLogEntry(resource, body);
                 if (logEntry.StoredQuantity > amtNeeded)
                 {
                     logEntry.StoredQuantity -= amtNeeded;
@@ -89,8 +106,8 @@ namespace PlanetaryLogistics
                 if (!(strAmt > 0)) 
                     return;
                 
-                var logEntry = PlanetaryLogisticsManager.Instance.FetchLogEntry(vesselId, body);
-                logEntry.StoredQuantity += (strAmt * (1d-vesselIdTax));
+                var logEntry = PlanetaryLogisticsManager.Instance.FetchLogEntry(resource, body);
+                logEntry.StoredQuantity += (strAmt * (1d-ResourceTax));
                 res.amount -= strAmt;
                 PlanetaryLogisticsManager.Instance.TrackLogEntry(logEntry);
             }
