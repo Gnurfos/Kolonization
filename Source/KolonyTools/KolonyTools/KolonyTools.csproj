@@ -17,7 +17,7 @@
     <DebugSymbols>false</DebugSymbols>
     <DebugType>none</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\..\..\..\..\KSP_DEV\GameData\UmbraSpaceIndustries\Kolonization\</OutputPath>
+    <OutputPath>..\..\..\..\..\KSP_KSPTV\GameData\UmbraSpaceIndustries\Kolonization\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>

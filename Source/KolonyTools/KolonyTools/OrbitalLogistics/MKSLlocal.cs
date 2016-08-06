@@ -9,7 +9,6 @@ using USITools;
 
 namespace KolonyTools
 {
-
     [KSPAddon(KSPAddon.Startup.Flight, false)]
     public class MKSLlocal : MonoBehaviour
     {
